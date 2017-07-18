@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="${projectName}" basedir="." default="build:main">
+    <!-- Properties -->
+    <property name="dir.app" value="${project.basedir}/app" />
+    <property name="dir.src" value="${project.basedir}/src" />
+    <property name="dir.build" value="${project.basedir}/build" />
+    <property name="dir.build.coverage" value="${dir.build}/coverage" />
+
+    <!-- Filesets -->
+    <fileset id="sourcecode" dir="${dir.src}">
+        <include name="**/*.php" />
+    </fileset>
+
+    <!-- Default target -->
+    <target name="build:main"
+            depends="phpunit, build:prepare, phpcs, lint:yaml, lint:twig, lint:xliff, security"
+            description="Run all test and build everything" />
+
+    <!-- Project build prepare -->
+    <target name="build:prepare" description="Create build directories.">
+        <echo msg="Creating build directories ..." />
+        <mkdir dir="${dir.build}" />
+        <mkdir dir="${dir.build}" />
+        <mkdir dir="${dir.build.coverage}" />
+    </target>
+
+    <!-- Unit tests -->
+    <target name="phpunit" description="Executes unit tests.">
+        <echo msg="Running unit tests ..." />
+        <exec command="vendor/bin/phpunit --log-junit ${dir.build}/phpunit.xml --coverage-clover ${dir.build.coverage}/clover.xml --coverage-html ${dir.build.coverage}/" logoutput="true" checkreturn="true"/>
+    </target>
+
+    <!-- Code Sniffer -->
+    <target name="phpcs" description="this checks that the source code follows the Symfony Code Syntax rules">
+        <echo msg="Running code sniffer ..." />
+        <exec command="./vendor/bin/php-cs-fixer fix --diff --dry-run -v" logoutput="true" checkreturn="true"/>
+    </target>
+
+    <!-- YAML Linter -->
+    <target name="lint:yaml" description="this checks that the YAML config files contain no syntax errors">
+        <echo msg="Running yaml linter ..." />
+        <exec command="./bin/console lint:yaml app/config" logoutput="true" checkreturn="true"/>
+        <exec command="./bin/console lint:yaml @CodeExplorerBundle" logoutput="true" checkreturn="true"/>
+    </target>
+
+    <!-- Twig Linter -->
+    <target name="lint:twig" description="this checks that the Twig template files contain no syntax errors">
+        <echo msg="Running twig linter..." />
+        <exec command="./bin/console lint:twig app/Resources @CodeExplorerBundle" checkreturn="true"/>
+    </target>
+
+    <!-- XLIFF Linter -->
+    <target name="lint:xliff" description="this checks that the  translations contain no syntax errors">
+        <echo msg="Running XLIFF linter..." />
+        <exec command="./bin/console lint:xliff app/Resources" logoutput="true" checkreturn="true"/>
+    </target>
+
+    <!-- XLIFF Linter -->
+    <target name="security" description="this checks that the application doesn't use dependencies with known security vulnerabilities">
+        <echo msg="Running Security Checks..." />
+        <exec command="./bin/console security:check --end-point=https://security.sensiolabs.org/check_lock" logoutput="true" checkreturn="true"/>
+    </target>
+</project>

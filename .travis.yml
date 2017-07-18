@@ -1,0 +1,17 @@
+language: bash
+services: docker
+
+env:
+  - PHP_VERSION=56 PROJECT="symfony"
+  - PHP_VERSION=70 PROJECT="symfony"
+  - PHP_VERSION=71 PROJECT="symfony"
+
+before_script:
+  - env | sort
+  - if [[ "PHP_VERSION" == "71" ]]; then docker pull php:7.1-fpm; fi;
+  - if [[ "PHP_VERSION" == "70" ]]; then docker pull php:7-fpm; fi;
+  - if [[ "PHP_VERSION" == "56" ]]; then docker pull php:5.6-fpm; fi;
+
+script:
+  - chmod +x build.sh
+  - ./build.sh ${PHP_VERSION} ${PROJECT}
